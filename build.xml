@@ -1,0 +1,66 @@
+<project name = "AntBuilder" basedir = ".">
+    <property name = "src" location = "src/main/java"/>
+    <property name = "build" location = "build"/>
+    <property name = "dist" location = "dist"/>
+
+    <property name="test.build.dir" value="build/test"/>
+    <property name="test.src.dir" value="src/test/java"/>
+
+    <path id="classpath.test">
+        <pathelement location="lib/junit-4.11.jar"/>
+        <pathelement location="lib/hamcrest-core-1.3.jar"/>
+        <pathelement location="${build}"/>
+    </path>
+
+    <target name = "init">
+        <mkdir dir = "${build}"/>
+        <mkdir dir = "${dist}"/>
+        <mkdir dir = "${test.build.dir}"/>
+    </target>
+
+    <target name = "compile" depends = "init">
+        <javac srcdir = "${src}" destdir = "${build}" source = "1.8" target = "1.8"/>
+    </target>
+
+    <target name="test-compile" depends="compile">
+        <mkdir dir="${test.build.dir}"/>
+        <javac srcdir="${test.src.dir}" destdir="${test.build.dir}" includeantruntime="false">
+            <classpath refid="classpath.test"/>
+        </javac>
+    </target>
+
+    <target name="test" depends="test-compile">
+        <junit printsummary="on" haltonfailure="yes" fork="true">
+            <classpath>
+                <path refid="classpath.test"/>
+                <pathelement location="${test.build.dir}"/>
+            </classpath>
+            <formatter type="brief" usefile="false" />
+            <batchtest>
+                <fileset dir="${test.src.dir}" includes="**/*Test.java" />
+            </batchtest>
+        </junit>
+    </target>
+
+    <target name = "dist" depends="test-compile">
+        <jar destfile = "${dist}/AntExample.jar">
+            <fileset dir = "${build}"/>
+            <manifest>
+                <attribute name = "Main-Class" value = "Bootstrap"/>
+            </manifest>
+        </jar>
+    </target>
+
+
+    <target  name = "clean">
+        <delete dir = "${build}"/>
+        <delete dir = "${dist}"/>
+        <delete dir = "${test.build.dir}"/>
+    </target>
+
+    <target name="make_all">
+        <antcall target="clean"/>
+        <antcall target="dist"/>
+    </target>
+
+</project>
